@@ -1,0 +1,21 @@
+# Иллюстрации
+
+Режим: встроенная генерация изображений. За основу композиции взят согласованный осенний макет экрана. Для игры подготовлены отдельные фон и прозрачные предметы; текст и кнопки рисуются средствами HTML и CSS.
+
+Фон: `assets/park.png`. Предметы: `assets/ball.png`, `assets/apple.png`, `assets/bottle.png`, `assets/teddy.png`, `assets/cat.png`, `assets/kite.png`, `assets/balloon.png`.
+
+## Промпт фона
+
+Extract and faithfully redraw ONLY the autumn PARK GAME BACKGROUND from the reference approved screen. Output a clean full bleed 2:1 landscape image, ideally 1536x768. Absolutely NO interface, paper margins, text, counters, toolbar, buttons, toy objects, border, rounded corners or watermark. Preserve exactly the same scene composition: giant tree at far left, autumn canopy upper left, round low cream-stone fountain centered slightly left in lower middle, orange-red playground slide at upper right, mustard stairs far right, dark green legs with visible opening underneath, winding cream path and olive grass, dusty blue sky. The fountain must have an elliptical water opening, clear back rim and front wall. Colored pencil and gouache on paper with visible hatching, warm ochre burnt sienna autumn trees, forest green grass and pale blue water. Preserve the reference composition and the relative position and size of every landmark. This asset will replace the scene rectangle exactly, so do not add or remove landmarks. No permanent ball or animals.
+
+## Промпт предметов
+
+Create a production game sprite sheet on a genuinely transparent background, exactly 4 columns by 2 rows, equal square cells, ideally 1536x768 total. Reference image is an approved autumn colored-pencil learning game. Match its pencil illustration style. Each cell contains exactly one isolated hand-drawn matte colored-pencil object, completely contained within its cell, centered, with 12 percent empty padding on every side. No shadows outside object, no white backing, no white halo, no labels, no text, no grid lines, no border. Reading order: top row cell1 a round yellow and coral-red beach ball, cell2 a red apple with green leaf, cell3 a blue transparent water bottle with blue cap, cell4 a brown seated teddy bear with red bow. Bottom row cell1 a cute seated ginger kitten, cell2 a green and purple diamond kite with short tied ribbon tail entirely inside cell, cell3 a red balloon with a short curved string entirely inside cell, cell4 completely empty and transparent. All seven objects should be large and legible at 64px, with harmonious visual scale. Colored pencil hatching, textured pigment, charming hand-drawn contours matching reference park. No glossy digital shading, no 3D, no toy plastic, no vector finish. Entire background and empty eighth cell must be transparent alpha.
+
+Полученный лист технически разрезан на семь отдельных PNG с сохранением прозрачности. Исходное разрешение фона — 1774 × 887. Иллюстрации не содержат запечённых элементов интерфейса.
+
+## Зарисовка для результатов
+
+Файл: `assets/results.png`. Режим: встроенная генерация изображений.
+
+Промпт: Create ONLY a charming isolated illustration vignette for the results screen of the referenced autumn colored-pencil English learning game. Genuine transparent background, landscape composition about 3:2. NO UI, no text, no numbers, no letters, no buttons, no background rectangle, no white border or halo, no drop shadow. Show the same cute ginger kitten and a small seated brown teddy bear with a red bow together on a little mound of autumn leaves, a yellow and coral beach ball resting beside them, and a few tiny ochre/terracotta leaves. The kitten looks happily at the viewer, warm understated celebration, no confetti or medals. Colored-pencil hatching, soft gouache pigment, slightly irregular handmade shapes, warm cream/ochre/rust/forest-green palette matching the reference. All subjects and leaf tips fully contained in the composition with transparent padding. The edges of the little leaf mound taper naturally into transparent background so the vignette can sit directly on a cream paper webpage, as an illustration printed on the paper rather than a sticker. Keep composition simple and spacious, full-bodied kitten clearly recognizable, no extra characters, no scene landmarks. This is an asset, not a full screen mockup.

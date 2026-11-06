@@ -9,13 +9,24 @@
   const audio = new Audio();
   const objects = { ball: 'ball', apple: 'apple', bottle: 'bottle', teddy: 'teddy bear', cat: 'cat', kite: 'kite', balloon: 'balloon' };
   const cells = Object.keys(objects);
+  // Retain decoded images for the tray, SVG previews, and the final screen.
+  const imageCache = new Map();
+  let resultsReady;
+  function prepareImage(id) {
+    if (!imageCache.has(id)) {
+      const image = new Image();
+      image.src = `assets/${id}.webp`;
+      imageCache.set(id, image.decode().then(() => image));
+    }
+    return imageCache.get(id);
+  }
   const $ = selector => root.querySelector(selector);
   const escape = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let session, question, selected = null, listened = false, scriptUsed = false, busy = false;
   let timers = [], lastResult, generation = 0;
   const later = (fn, ms) => { const token = generation; timers.push(setTimeout(() => { if (token === generation) fn(); }, ms)); };
   function sprite(id) {
-    return `<img src="assets/${id}.png" alt="" draggable="false">`;
+    return `<img src="assets/${id}.webp" alt="" draggable="false">`;
   }
   function message(text = '', kind = '') {
     const target = $('#feedback');
@@ -44,7 +55,7 @@
       <header class="heading"><h1 class="instruction">${escape(question.instruction.replace(/\.$/, ''))}</h1><div class="stats" aria-label="Progress"><span>Question <b>${session.index+1} of ${session.ids.length}</b></span><span>Correct <b>${correct}</b></span></div></header>
       <div class="toolbar"><button class="control play" id="play" type="button"><img src="assets/sound.svg" alt=""><span>Play</span></button><div class="objects" role="group" aria-label="Objects to move">${cells.map(id => `<button class="object" type="button" data-object="${id}" aria-label="${objects[id]}" aria-pressed="false">${sprite(id)}</button>`).join('')}</div><button class="control script-button" id="script-button" type="button" aria-controls="script" aria-expanded="false">Script</button></div>
       <section class="script" id="script" hidden><p>${escape(question.script)}</p><p lang="ru">${escape(question.translation)}</p></section>
-      <div class="scene-wrap"><svg class="scene" id="scene" viewBox="0 0 1000 500" role="group" aria-label="Autumn park with a fountain, a slide, and a big tree"><image href="assets/park.png" width="1000" height="500"/><g id="focus" aria-hidden="true"></g><g id="placed" aria-hidden="true"></g><g id="preview" aria-hidden="true"></g><g id="focus-label" aria-hidden="true"></g><g id="zones">${G.zones.map(z => `<path d="${z.shapes.map(G.path).join('')}" fill-rule="evenodd" data-zone="${z.id}" tabindex="0" role="button" aria-label="Place ${escape(z.id.replace('|', ' the '))}"/>`).join('')}</g></svg></div>
+      <div class="scene-wrap"><svg class="scene" id="scene" viewBox="0 0 1000 500" role="group" aria-label="Autumn park with a fountain, a slide, and a big tree"><image href="assets/park.webp" width="1000" height="500"/><g id="focus" aria-hidden="true"></g><g id="placed" aria-hidden="true"></g><g id="preview" aria-hidden="true"></g><g id="focus-label" aria-hidden="true"></g><g id="zones">${G.zones.map(z => `<path d="${z.shapes.map(G.path).join('')}" fill-rule="evenodd" data-zone="${z.id}" tabindex="0" role="button" aria-label="Place ${escape(z.id.replace('|', ' the '))}"/>`).join('')}</g></svg></div>
       <footer class="feedback-row"><p id="feedback" class="feedback" aria-live="polite" role="status"></p><button class="control skip" id="skip" type="button">Skip the question</button></footer>${storageNote()}<div class="ghost" id="ghost" hidden></div>`;
     const token = generation;
     audio.src = question.audio;
@@ -104,7 +115,7 @@
     if (zone?.behind) clip='<mask id="occlusion" maskUnits="userSpaceOnUse"><rect width="1000" height="500" fill="white"/><path d="M256 326A221 38 0 0 1 698 326L698 374Q698 415 477 415Q256 415 256 374Z" fill="black"/></mask>';
     if (zone?.under) clip='<mask id="occlusion" maskUnits="userSpaceOnUse"><rect width="1000" height="500" fill="white"/><path d="M773 185h13v89h-13zM812 183h14v96h-14zM868 182h14v98h-14z" fill="black"/></mask>';
     const waterClip=zone?.water ? `<clipPath id="waterline"><rect x="${p.x-s/2}" y="${p.y-s/2}" width="${s}" height="${s*.5}"/></clipPath>` : '';
-    return `<defs>${clip}${waterClip}</defs><g opacity="${previewing?.65:1}"${clip?' mask="url(#occlusion)"':''}><g${waterClip?' clip-path="url(#waterline)"':''}><image href="assets/${id}.png" x="${p.x-s/2}" y="${p.y-s/2}" width="${s}" height="${s}"/></g></g>`;
+    return `<defs>${clip}${waterClip}</defs><g opacity="${previewing?.65:1}"${clip?' mask="url(#occlusion)"':''}><g${waterClip?' clip-path="url(#waterline)"':''}><image href="assets/${id}.webp" x="${p.x-s/2}" y="${p.y-s/2}" width="${s}" height="${s}"/></g></g>`;
   }
   function preview(x,y) {
     if (!selected || busy) return;
@@ -170,11 +181,13 @@
       busy=false; select(null); message(); $('#skip').disabled=false; $('#play').disabled=false;
     },300);
   }
-  function showResults() {
+  async function showResults() {
+    // The download starts during the game; decode before displaying results.
+    await resultsReady;
     const outcomes=lastResult.outcomes;
     cleanup();
     const count=kind=>outcomes.filter(o=>o.kind===kind).length;
-    root.innerHTML=`<section class="results"><header class="results-header"><h1>Practice complete!</h1><p class="results-intro">You finished 15 questions.</p></header><div class="results-body"><dl><div><dt>Correct on the first try</dt><dd>${count('first')}</dd></div><div><dt>Correct after trying again</dt><dd>${count('corrected')}</dd></div><div><dt>Skipped</dt><dd>${count('skipped')}</dd></div></dl><div class="results-drawing"><img src="assets/results.png" alt="A kitten and a teddy bear sitting together in autumn leaves beside a ball."></div></div><footer class="results-footer"><p class="results-next">Another 15 questions?</p><p class="results-repeat">Mistakes and skipped questions come first.</p>${storageNote()}<button class="control play" id="again" type="button">Play again</button></footer></section>`;
+    root.innerHTML=`<section class="results"><header class="results-header"><h1>Practice complete!</h1><p class="results-intro">You finished 15 questions.</p></header><div class="results-body"><dl><div><dt>Correct on the first try</dt><dd>${count('first')}</dd></div><div><dt>Correct after trying again</dt><dd>${count('corrected')}</dd></div><div><dt>Skipped</dt><dd>${count('skipped')}</dd></div></dl><div class="results-drawing"><img src="assets/results.webp" alt="A kitten and a teddy bear sitting together in autumn leaves beside a ball."></div></div><footer class="results-footer"><p class="results-next">Another 15 questions?</p><p class="results-repeat">Mistakes and skipped questions come first.</p>${storageNote()}<button class="control play" id="again" type="button">Play again</button></footer></section>`;
     $('#again').onclick=showQuestion;
   }
   const input = new window.TrainerPointer.PointerInput({
@@ -194,5 +207,17 @@
   window.addEventListener('keydown',event=>{if(event.key==='Tab')root.classList.add('keyboard-mode');if(event.key==='Escape'&&!busy)input.cancel();});
   window.addEventListener('resize',()=>{if(input.active&&!busy)input.cancel();});
   window.addEventListener('pagehide',()=>{input.cancel();audio.pause();progress.save();});
-  showQuestion();
+  async function start() {
+    root.innerHTML='<p class="loading-screen" role="status">Loading the park…</p>';
+    try {
+      await Promise.all(['park',...cells].map(prepareImage));
+      // Start only after the initial scene is ready, so this cannot slow it down.
+      resultsReady=prepareImage('results').catch(() => null);
+      showQuestion();
+    } catch (_) {
+      root.innerHTML='<div class="loading-screen"><p role="alert">Images could not be loaded. Please try again.</p><button class="control" id="retry-images" type="button">Try again</button></div>';
+      $('#retry-images').onclick=()=>{imageCache.clear();start();};
+    }
+  }
+  start();
 })();

@@ -10,6 +10,7 @@
   background: var(--paper);
 }
 * { box-sizing: border-box; }
+.loading-screen { min-height: 60vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; font-size: 20px; }
 body { margin: 0; background-image: url("assets/paper.svg"); }
 button { font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 button:disabled { cursor: default; opacity: .5; }

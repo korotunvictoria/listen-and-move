@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const base = path.resolve(__dirname, '..');
 const port = Number(process.argv[2] || 8766);
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.wav':'audio/wav' };
+const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.webp':'image/webp', '.wav':'audio/wav' };
 http.createServer((request,response) => {
   let name;
   try { name=decodeURIComponent(new URL(request.url,'http://localhost').pathname); }
